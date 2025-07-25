@@ -1,0 +1,1 @@
+// Configuración real de Firebase puede integrarse aquí más adelante
