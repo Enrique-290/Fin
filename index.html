@@ -1,34 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Dinamita POS</title>
-  <style>
-    body { background-color: black; color: white; font-family: sans-serif; text-align: center; }
-    .login { margin-top: 50px; }
-    input, button { padding: 10px; margin: 5px; border-radius: 8px; }
-    .hidden { display: none; }
-    .control-panel { background-color: #1c1c1c; padding: 20px; border-radius: 10px; margin-top: 20px; }
-    .control-panel h2 { color: #ff3c3c; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinamita POS</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="login">
-    <h1>💥 Dinamita POS</h1>
-    <p>Ingresa tu correo:</p>
-    <input type="email" id="correo" placeholder="tucorreo@dinamita.com">
-    <button onclick="login()">Entrar</button>
-    <p id="error" style="color:red;"></p>
-  </div>
+    <div class="container">
+        <img src="logo.png" alt="Dinamita Gym Logo" class="logo">
+        <h1>💥 Dinamita POS</h1>
+        <p>Ingresar correo para continuar:</p>
+        <input type="email" id="correo" placeholder="Correo electrónico">
+        <button onclick="entrar()">Entrar</button>
 
-  <div id="control" class="control-panel hidden">
-    <h2>Módulo de Control</h2>
-    <button onclick="registrar()">Registrar Membresía</button>
-    <button onclick="verCalendario()">Ver Calendario</button>
-    <button onclick="exportar()">Exportar PDF / Excel</button>
-    <div id="output"></div>
-  </div>
-
-  <script src="script.js"></script>
+        <div id="moduloControl" class="hidden">
+            <h2>Módulo de Control</h2>
+            <button onclick="registrar()">Registrar Membresía</button>
+            <button onclick="verCalendario()">Ver Calendario</button>
+            <button onclick="exportar()">Exportar PDF / Excel</button>
+            <p>📦 Exportación a PDF y Excel realizada</p>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
