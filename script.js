@@ -1,23 +1,21 @@
 
-function login() {
-  const correo = document.getElementById('correo').value.trim().toLowerCase();
-  const acceso = 'enri290@gmail.com';
-  if (correo === acceso) {
-    document.querySelector('.login').classList.add('hidden');
-    document.getElementById('control').classList.remove('hidden');
-  } else {
-    document.getElementById('error').innerText = '❌ Acceso denegado';
-  }
+function entrar() {
+    const email = document.getElementById('correo').value;
+    if (email === "enri290@gmail.com" || email === "dinamitagym00@gmail.com") {
+        document.getElementById("moduloControl").classList.remove("hidden");
+    } else {
+        alert("Correo no autorizado");
+    }
 }
 
 function registrar() {
-  document.getElementById('output').innerHTML = '<p style="color:#0f0;">✅ Membresía registrada correctamente</p>';
+    alert("Función de registro activa");
 }
 
 function verCalendario() {
-  document.getElementById('output').innerHTML = '<p>📅 Vista de calendario cargada</p>';
+    alert("Vista calendario");
 }
 
 function exportar() {
-  document.getElementById('output').innerHTML = '<p>📤 Exportación a PDF y Excel realizada</p>';
+    alert("Exportando a PDF / Excel");
 }
