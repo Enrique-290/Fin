@@ -1,27 +1,47 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dinamita POS</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: #111;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            color: red;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 1em;
+        }
+        .module {
+            margin-top: 30px;
+        }
+        button {
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <img src="logo.png" alt="Dinamita Gym Logo" class="logo">
-        <h1>💥 Dinamita POS</h1>
-        <p>Ingresar correo para continuar:</p>
-        <input type="email" id="correo" placeholder="Correo electrónico">
-        <button onclick="entrar()">Entrar</button>
+    <h1>💥 Dinamita POS</h1>
+    <p>Ingresar correo para continuar:</p>
+    <input type="email" placeholder="Correo">
+    <button>Entrar</button>
 
-        <div id="moduloControl" class="hidden">
-            <h2>Módulo de Control</h2>
-            <button onclick="registrar()">Registrar Membresía</button>
-            <button onclick="verCalendario()">Ver Calendario</button>
-            <button onclick="exportar()">Exportar PDF / Excel</button>
-            <p>📦 Exportación a PDF y Excel realizada</p>
-        </div>
+    <div class="module">
+        <h2>Módulo de Control</h2>
+        <button>Registrar Membresía</button>
+        <button>Ver Calendario</button>
     </div>
-    <script src="script.js"></script>
 </body>
 </html>
