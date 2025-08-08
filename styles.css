@@ -28,14 +28,34 @@ th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left}
 .results{max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px;margin:6px 0;background:#fff}
 .results div{padding:6px;border-bottom:1px solid var(--line);cursor:pointer}
 .results div:hover{background:#f7f7f7}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center}
-.modal-content{background:#fff;color:#000;border-radius:12px;padding:16px;min-width:320px;max-width:420px}
-.modal-actions{display:flex;gap:8px;justify-content:center;margin-top:8px}
+/* Modal */
+.modal{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.55);
+  display:flex; align-items:center; justify-content:center;
+  padding:16px; z-index:9999;
+}
+.modal-content{background:#fff;color:#000;border-radius:12px;padding:16px;width:100%;max-width:480px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.modal-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+body.modal-open{overflow:hidden}
+/* Ticket */
+.ticket{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px}
+.tk-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.tk-logo{font-weight:900;font-size:18px;color:#111}
+.tk-logo span{color:var(--accent)}
+.tk-meta{font-size:12px;color:#555;text-align:right}
+.tk-body{margin-top:8px}
+#tkCliente{font-size:12px;color:#444;margin-bottom:6px}
+.tk-table{width:100%;border-collapse:collapse;font-size:12px}
+.tk-table th,.tk-table td{border-bottom:1px solid #eee;padding:6px;text-align:left}
+.tk-table th:nth-child(2),.tk-table td:nth-child(2),
+.tk-table th:nth-child(3),.tk-table td:nth-child(3),
+.tk-table th:nth-child(4),.tk-table td:nth-child(4){text-align:center}
+.tk-total{display:flex;justify-content:space-between;align-items:center;background:#fff4f4;border:1px solid #ffd6d6;border-radius:8px;padding:8px 10px;margin-top:10px;font-weight:700;color:#111}
+.tk-total div:last-child{color:var(--accent)}
+.tk-foot{text-align:center;font-size:12px;color:#555;margin-top:8px}
 @media print{
   body *{visibility:hidden}
   #ticketArea, #ticketArea *{visibility:visible}
   #ticketArea{position:absolute;left:0;top:0}
 }
-.editor{margin-top:12px;padding:12px;border:1px dashed var(--line);border-radius:12px;background:#fff}
-.editor-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
-.uploader{display:grid;gap:6px;margin-top:8px}

@@ -34,7 +34,7 @@ if(!LS.get("productos")) LS.set("productos", seedProductos);
 if(!LS.get("ventas")) LS.set("ventas", []);
 if(!LS.get("clientes")) LS.set("clientes", []);
 
-// ====== LOGIN ======
+// ====== LOGIN (mantén tus correos) ======
 const allowed = ["enri290@gmail.com","dinamitagym00@gmail.com"];
 let currentUser = null;
 document.getElementById("btnLogin").onclick = () => {
@@ -165,11 +165,24 @@ document.getElementById("mVender").onclick = ()=>{
   showTicket(venta);
 };
 
-// ====== TICKET (modal + export) ======
+// ====== TICKET (modal + export mejorado) ======
 const ticketModal = document.getElementById("ticketModal");
-const ticketBody = document.getElementById("ticketBody");
-document.getElementById("tkClose").onclick = ()=> ticketModal.classList.add("hidden");
-document.getElementById("tkPrint").onclick = ()=> window.print();
+function openModal(){ ticketModal.classList.remove("hidden"); document.body.classList.add("modal-open"); }
+function closeModal(){ ticketModal.classList.add("hidden"); document.body.classList.remove("modal-open"); }
+document.getElementById("tkClose").onclick = closeModal;
+ticketModal.addEventListener("click", (e)=>{ const area = document.getElementById("ticketArea"); if(!area.contains(e.target)) closeModal(); });
+window.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && !ticketModal.classList.contains("hidden")) closeModal(); });
+
+function showTicket(venta){
+  document.getElementById("tkFecha").textContent = new Date(venta.fecha).toLocaleString();
+  document.getElementById("tkCliente").textContent = venta.cliente ? ("Cliente: " + venta.cliente) : "";
+  const tb = document.getElementById("tkItems");
+  tb.innerHTML = venta.items.map(it=>`<tr><td>${it.nombre}</td><td>${it.cant}</td><td>$${it.precio}</td><td>$${it.precio*it.cant}</td></tr>`).join("");
+  document.getElementById("tkTotal").textContent = "$" + venta.total;
+  openModal();
+}
+
+document.getElementById("tkPrint").onclick = ()=>{ window.print(); setTimeout(closeModal,500); };
 document.getElementById("tkIMG").onclick = async ()=>{
   const area = document.getElementById("ticketArea");
   const canvas = await html2canvas(area, {backgroundColor:"#fff", scale:2});
@@ -177,6 +190,7 @@ document.getElementById("tkIMG").onclick = async ()=>{
   link.download = "ticket_dinamita.png";
   link.href = canvas.toDataURL("image/png");
   link.click();
+  setTimeout(closeModal, 300);
 };
 document.getElementById("tkPDF").onclick = async ()=>{
   const area = document.getElementById("ticketArea");
@@ -190,27 +204,10 @@ document.getElementById("tkPDF").onclick = async ()=>{
   const imgHeight = imgWidth * ratio;
   pdf.addImage(imgData, "PNG", 20, 20, imgWidth, imgHeight);
   pdf.save("ticket_dinamita.pdf");
+  setTimeout(closeModal, 300);
 };
-function showTicket(venta){
-  ticketBody.innerHTML = `
-    <div><b>Fecha:</b> ${new Date(venta.fecha).toLocaleString()}</div>
-    <div><b>Tipo:</b> ${venta.tipo}</div>
-    ${venta.cliente? `<div><b>Cliente:</b> ${venta.cliente}</div>`: ""}
-    <hr/>
-    <table style="width:100%;border-collapse:collapse">
-      <thead><tr><th style="text-align:left">Item</th><th>Cant</th><th>P.U.</th><th>Subt.</th></tr></thead>
-      <tbody>
-        ${venta.items.map(it=>`<tr><td>${it.nombre}</td><td style="text-align:center">${it.cant}</td><td style="text-align:center">$${it.precio}</td><td style="text-align:center">$${it.precio*it.cant}</td></tr>`).join("")}
-      </tbody>
-    </table>
-    <hr/>
-    <div style="text-align:right"><b>Total: $${venta.total}</b></div>
-    ${venta.detalle ? `<div style="margin-top:6px"><small>Inicio: ${venta.detalle.inicio||"-"} | Fin: ${venta.detalle.fin||"-"} | Acceso: ${venta.detalle.acceso? "Activado":"No"}</small></div>`: ""}
-  `;
-  ticketModal.classList.remove("hidden");
-}
 
-// ====== CATÁLOGO (CRUD + EDITOR CON IMAGEN) ======
+// ====== CATALOGO (CRUD + EDITOR CON IMAGEN) ======
 function buildCrud(tableEl, data, cols, onEdit){
   const head = "<thead><tr>" + cols.map(c=>`<th>${c.label}</th>`).join("") + "<th></th></tr></thead>";
   let body = "<tbody>";
@@ -245,14 +242,14 @@ let editIdx = -1;
 function renderCatalogo(){
   const serv = LS.get("servicios",[]);
   const prods = LS.get("productos",[]);
-  // Servicios simple
+  // Servicios
   buildCrud(document.getElementById("tblServicios"), serv, [
     {key:"servicio", label:"Servicio"},
     {key:"tipo", label:"Tipo"},
     {key:"segmento", label:"Segmento"},
     {key:"precio", label:"Precio"}
   ], ()=>{});
-  // Productos con imagen y editor
+  // Productos con editor
   buildCrud(document.getElementById("tblProductos"), prods, [
     {key:"sku", label:"SKU"},
     {key:"nombre", label:"Nombre"},
@@ -295,7 +292,6 @@ document.getElementById("eImagenFile").addEventListener("change", (e)=>{
   reader.onload = (ev)=>{
     const dataUrl = ev.target.result;
     document.getElementById("ePreview").innerHTML = `<img src="${dataUrl}" style="max-width:140px;border:1px solid #eee;border-radius:8px"/>`;
-    // Guardar temporal en el objeto editado
     const prods = LS.get("productos",[]);
     if(editIdx>-1) prods[editIdx].imagen = dataUrl;
     LS.set("productos", prods);

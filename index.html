@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DINÁMITA POS (Light + Imágenes)</title>
+  <title>DINÁMITA POS (Light v2)</title>
   <link rel="stylesheet" href="styles.css"/>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -136,16 +136,33 @@
 
   <!-- MODAL TICKET -->
   <div id="ticketModal" class="modal hidden">
-    <div class="modal-content" id="ticketArea">
-      <h3>DINÁMITA GYM - Ticket</h3>
-      <div id="ticketBody"></div>
-      <small>Gracias por tu compra</small>
-    </div>
-    <div class="modal-actions">
-      <button id="tkPrint" class="btn-outline">Imprimir</button>
-      <button id="tkPDF" class="btn-outline">Descargar PDF</button>
-      <button id="tkIMG" class="btn-outline">Descargar imagen</button>
-      <button id="tkClose" class="btn-danger">Cerrar</button>
+    <div class="modal-content">
+      <div id="ticketArea" class="ticket">
+        <div class="tk-head">
+          <div class="tk-logo">DINÁMITA <span>GYM</span></div>
+          <div class="tk-meta">
+            <div><b>Ticket</b></div>
+            <div id="tkFecha"></div>
+          </div>
+        </div>
+        <div class="tk-body">
+          <div id="tkCliente"></div>
+          <table class="tk-table">
+            <thead><tr><th>Concepto</th><th>Cant</th><th>P.U.</th><th>Subt.</th></tr></thead>
+            <tbody id="tkItems"></tbody>
+          </table>
+        </div>
+        <div class="tk-total">
+          <div>Total</div><div id="tkTotal"></div>
+        </div>
+        <div class="tk-foot">Gracias por tu compra 💥</div>
+      </div>
+      <div class="modal-actions">
+        <button id="tkPrint" class="btn-outline">Imprimir</button>
+        <button id="tkPDF" class="btn-outline">Descargar PDF</button>
+        <button id="tkIMG" class="btn-outline">Descargar imagen</button>
+        <button id="tkClose" class="btn-danger">Cerrar</button>
+      </div>
     </div>
   </div>
 
