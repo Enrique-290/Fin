@@ -1,4 +1,5 @@
 
+// ====== DATA SEED ======
 const seedServicios = [
   {servicio:"Mensualidad normal", tipo:"Mensualidad", segmento:"Normal", precio:350},
   {servicio:"Mensualidad socios", tipo:"Mensualidad", segmento:"Socios", precio:300},
@@ -11,18 +12,18 @@ const seedServicios = [
   {servicio:"Visita VIP", tipo:"Visita", segmento:"VIP", precio:25},
 ];
 const seedProductos = [
-  {sku:"", nombre:"Agua Bonafont 1L", categoria:"Agua", precioVenta:14, precioCompra:"", stock:20},
-  {sku:"", nombre:"Agua Bonafont 2L", categoria:"Agua", precioVenta:20, precioCompra:"", stock:20},
-  {sku:"", nombre:"Agua Bonafont 1.5L", categoria:"Agua", precioVenta:16, precioCompra:"", stock:20},
-  {sku:"", nombre:"Gatorade 1L", categoria:"Hidratante", precioVenta:26, precioCompra:"", stock:20},
-  {sku:"", nombre:"Gatorade 600ml", categoria:"Hidratante", precioVenta:20, precioCompra:"", stock:20},
-  {sku:"", nombre:"Volt Blue", categoria:"Energética", precioVenta:22, precioCompra:"", stock:20},
-  {sku:"", nombre:"Volt Yellow", categoria:"Energética", precioVenta:22, precioCompra:"", stock:20},
-  {sku:"", nombre:"Volt Pink", categoria:"Energética", precioVenta:22, precioCompra:"", stock:20},
-  {sku:"", nombre:"Electrolit", categoria:"Hidratante", precioVenta:25, precioCompra:"", stock:20},
-  {sku:"", nombre:"T Proteína Whey", categoria:"Suplemento", precioVenta:25, precioCompra:"", stock:20},
-  {sku:"", nombre:"T Proteína Mass", categoria:"Suplemento", precioVenta:35, precioCompra:"", stock:20},
-  {sku:"", nombre:"Óxido", categoria:"Suplemento", precioVenta:25, precioCompra:"", stock:20},
+  {sku:"", nombre:"Agua Bonafont 1L", categoria:"Agua", precioVenta:14, precioCompra:"", stock:20, imagen:""},
+  {sku:"", nombre:"Agua Bonafont 2L", categoria:"Agua", precioVenta:20, precioCompra:"", stock:20, imagen:""},
+  {sku:"", nombre:"Agua Bonafont 1.5L", categoria:"Agua", precioVenta:16, precioCompra:"", stock:20, imagen:""},
+  {sku:"", nombre:"Gatorade 1L", categoria:"Hidratante", precioVenta:26, precioCompra:"", stock:20, imagen:""},
+  {sku:"", nombre:"Gatorade 600ml", categoria:"Hidratante", precioVenta:20, precioCompra:"", stock:20, imagen:""},
+  {sku:"", nombre:"Volt Blue", categoria:"Energética", precioVenta:22, precioCompra:"", stock:20, imagen:""},
+  {sku:"", nombre:"Volt Yellow", categoria:"Energética", precioVenta:22, precioCompra:"", stock:20, imagen:""},
+  {sku:"", nombre:"Volt Pink", categoria:"Energética", precioVenta:22, precioCompra:"", stock:20, imagen:""},
+  {sku:"", nombre:"Electrolit", categoria:"Hidratante", precioVenta:25, precioCompra:"", stock:20, imagen:""},
+  {sku:"", nombre:"T Proteína Whey", categoria:"Suplemento", precioVenta:25, precioCompra:"", stock:20, imagen:""},
+  {sku:"", nombre:"T Proteína Mass", categoria:"Suplemento", precioVenta:35, precioCompra:"", stock:20, imagen:""},
+  {sku:"", nombre:"Óxido", categoria:"Suplemento", precioVenta:25, precioCompra:"", stock:20, imagen:""},
 ];
 const LS = {
   get(k, def){ try{ return JSON.parse(localStorage.getItem(k)) ?? def }catch(e){ return def } },
@@ -32,8 +33,8 @@ if(!LS.get("servicios")) LS.set("servicios", seedServicios);
 if(!LS.get("productos")) LS.set("productos", seedProductos);
 if(!LS.get("ventas")) LS.set("ventas", []);
 if(!LS.get("clientes")) LS.set("clientes", []);
-if(!LS.get("membresias")) LS.set("membresias", []);
 
+// ====== LOGIN ======
 const allowed = ["enri290@gmail.com","dinamitagym00@gmail.com"];
 let currentUser = null;
 document.getElementById("btnLogin").onclick = () => {
@@ -43,179 +44,298 @@ document.getElementById("btnLogin").onclick = () => {
     document.getElementById("userBox").innerHTML = `Bienvenido, ${mail}`;
     document.getElementById("nav").classList.remove("hidden");
     showView("ventas");
+    render();
   } else alert("Correo no autorizado");
 };
 
-document.querySelectorAll("nav button").forEach(b=>{
-  b.onclick = ()=> showView(b.dataset.view);
-});
+// ====== NAV ======
+document.querySelectorAll("nav button").forEach(b=> b.onclick = ()=> showView(b.dataset.view));
 function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.add("hidden"));
   document.getElementById("view-"+id).classList.remove("hidden");
+  if(id==="historial") drawHistorial();
+  if(id==="clientes") drawClientes();
+  if(id==="catalogo") renderCatalogo();
 }
 
-// Ventas
-const selServicio = document.getElementById("selServicio");
-const selProducto = document.getElementById("selProducto");
-const carritoBody = document.querySelector("#tblCarrito tbody");
-const totalVentaEl = document.getElementById("totalVenta");
-const ticketMsg = document.getElementById("ticketMsg");
-let carrito = [];
-
-function renderSelects(){
-  selServicio.innerHTML = LS.get("servicios",[]).map((s,i)=>`<option value="${i}">${s.servicio} - $${s.precio}</option>`).join("");
-  selProducto.innerHTML = LS.get("productos",[]).map((p,i)=>`<option value="${i}">${p.nombre} - $${p.precioVenta}</option>`).join("");
-}
-renderSelects();
-
-document.getElementById("addServicio").onclick = () => {
-  const i = parseInt(selServicio.value); const c = parseInt(document.getElementById("cantServicio").value||1);
-  const s = LS.get("servicios",[])[i];
-  carrito.push({tipo:"servicio", nombre:s.servicio, precio:s.precio, cant:c});
-  drawCarrito();
-};
-document.getElementById("addProducto").onclick = () => {
-  const i = parseInt(selProducto.value); const c = parseInt(document.getElementById("cantProducto").value||1);
-  const p = LS.get("productos",[])[i];
-  carrito.push({tipo:"producto", idx:i, nombre:p.nombre, precio:p.precioVenta, cant:c});
-  drawCarrito();
-};
-function drawCarrito(){
-  carritoBody.innerHTML = "";
-  let total = 0;
-  carrito.forEach((it,idx)=>{
-    const sub = it.precio * it.cant; total += sub;
-    carritoBody.innerHTML += `<tr><td>${it.nombre}</td><td>${it.cant}</td><td>$${it.precio}</td><td>$${sub}</td><td><button data-i="${idx}" class="del">X</button></td></tr>`;
-  });
-  totalVentaEl.textContent = total;
-  document.querySelectorAll(".del").forEach(b=> b.onclick = ()=>{ carrito.splice(parseInt(b.dataset.i),1); drawCarrito(); });
-}
-
-document.getElementById("confirmarVenta").onclick = () => {
-  if(!currentUser) return alert("Inicia sesión");
-  if(carrito.length===0) return alert("Agrega items");
-  const productos = LS.get("productos",[]);
-  carrito.forEach(it=>{
-    if(it.tipo==="producto" && productos[it.idx]){
-      productos[it.idx].stock = (parseInt(productos[it.idx].stock||0) - it.cant);
-      if(productos[it.idx].stock < 0) productos[it.idx].stock = 0;
-    }
-  });
-  LS.set("productos", productos);
-  drawInventario();
-  const total = carrito.reduce((a,b)=> a + b.precio*b.cant, 0);
-  const venta = {fecha:new Date().toISOString(), usuario: currentUser, metodo: document.getElementById("metodoPago").value, total, items:carrito};
-  const ventas = LS.get("ventas",[]); ventas.unshift(venta); LS.set("ventas", ventas);
-  carrito = []; drawCarrito();
-  ticketMsg.textContent = "✅ Venta registrada";
-  setTimeout(()=> ticketMsg.textContent="", 2000);
-};
-
-// Catalogo CRUD
-function buildCrud(tableEl, data, cols){
-  const head = "<thead><tr>" + cols.map(c=>`<th>${c.label}</th>`).join("") + "<th></th></tr></thead>";
-  let body = "<tbody>";
-  data.forEach((row,i)=>{
-    body += "<tr>";
-    cols.forEach(c=>{
-      body += `<td contenteditable data-col="${c.key}" data-i="${i}">${row[c.key]??""}</td>`;
-    });
-    body += `<td><button class="delRow" data-i="${i}">Borrar</button></td>`;
-    body += "</tr>";
-  });
-  body += "</tbody>";
-  tableEl.innerHTML = head + body;
-  tableEl.querySelectorAll("[contenteditable]").forEach(td=>{
-    td.oninput = ()=>{
-      const i = parseInt(td.dataset.i); const col = td.dataset.col;
-      data[i][col] = td.innerText.trim();
-    }
-  });
-  tableEl.querySelectorAll(".delRow").forEach(btn=> btn.onclick = ()=>{
-    const i = parseInt(btn.dataset.i); data.splice(i,1); buildCrud(tableEl, data, cols);
-  });
-}
-
-function renderCatalogo(){
-  const serv = LS.get("servicios",[]);
+// ====== RENDER SELECTS Y PREVIEW ======
+function render(){
   const prods = LS.get("productos",[]);
-  buildCrud(document.getElementById("tblServicios"), serv, [
-    {key:"servicio", label:"Servicio"},
-    {key:"tipo", label:"Tipo"},
-    {key:"segmento", label:"Segmento"},
-    {key:"precio", label:"Precio"}
-  ]);
-  buildCrud(document.getElementById("tblProductos"), prods, [
-    {key:"sku", label:"SKU"},
-    {key:"nombre", label:"Nombre"},
-    {key:"categoria", label:"Categoría"},
-    {key:"precioVenta", label:"Precio Venta"},
-    {key:"precioCompra", label:"Precio Compra"},
-    {key:"stock", label:"Stock"}
-  ]);
-  document.getElementById("addRowServicio").onclick = ()=>{ serv.push({servicio:"Nuevo", tipo:"", segmento:"", precio:0}); renderCatalogo(); };
-  document.getElementById("addRowProducto").onclick = ()=>{ prods.push({sku:"", nombre:"Nuevo", categoria:"", precioVenta:0, precioCompra:"", stock:0}); renderCatalogo(); };
-  document.getElementById("guardarCatalogo").onclick = ()=>{ LS.set("servicios",serv); LS.set("productos",prods); document.getElementById("saveMsg").textContent="Guardado"; setTimeout(()=>document.getElementById("saveMsg").textContent="",1500); renderSelects(); drawInventario(); };
-}
+  const selP = document.getElementById("selProducto");
+  selP.innerHTML = prods.map((p,i)=>`<option value="${i}">${p.nombre} - $${p.precioVenta}</option>`).join("");
+  selP.onchange = ()=> showPreview();
+  showPreview();
 
-// Inventario
-function drawInventario(){
+  const selS = document.getElementById("mTipo");
+  selS.innerHTML = LS.get("servicios",[]).map((s,i)=>`<option value="${i}">${s.servicio} - $${s.precio}</option>`).join("");
+}
+function showPreview(){
   const prods = LS.get("productos",[]);
-  const tb = document.querySelector("#tblInv tbody");
-  tb.innerHTML = "";
-  prods.forEach(p=>{
-    tb.innerHTML += `<tr><td>${p.sku||""}</td><td>${p.nombre}</td><td>${p.categoria}</td><td>${p.stock||0}</td></tr>`;
-  });
+  const i = parseInt(document.getElementById("selProducto").value || 0);
+  const p = prods[i];
+  const prev = document.getElementById("previewProducto");
+  prev.innerHTML = p?.imagen ? `<img src="${p.imagen}" alt="${p.nombre}"/>` : "<small class='muted'>Sin imagen</small>";
 }
 
-// Membresías
-function setupMembresias(){
-  const sel = document.getElementById("mTipo");
-  sel.innerHTML = LS.get("servicios",[])
-    .filter(s=> s.tipo.toLowerCase()!=="visita")
-    .map(s=> `<option value="${s.servicio}">${s.servicio} - $${s.precio}</option>`).join("");
-  document.getElementById("mRegistrar").onclick = ()=>{
-    const nombre = document.getElementById("mCli").value.trim();
-    if(!nombre) return alert("Nombre requerido");
-    const tipo = sel.value;
-    const membs = LS.get("membresias",[]);
-    membs.unshift({cliente:nombre, tipo, fecha:new Date().toISOString(), estado:"Activa"});
-    LS.set("membresias", membs);
-    document.getElementById("mMsg").textContent = "✅ Membresía registrada";
-    setTimeout(()=> document.getElementById("mMsg").textContent="", 1500);
-  };
-}
-
-// Clientes
+// ====== CLIENTES ======
 function drawClientes(){
   const tb = document.querySelector("#tblClientes tbody");
   const arr = LS.get("clientes",[]);
   tb.innerHTML = "";
   arr.forEach(c=> tb.innerHTML += `<tr><td>${c.nombre}</td><td>${c.tel||""}</td></tr>`);
-  document.getElementById("cAgregar").onclick = ()=>{
-    const n = document.getElementById("cNombre").value.trim();
-    if(!n) return alert("Nombre requerido");
-    const t = document.getElementById("cTel").value.trim();
-    arr.unshift({nombre:n, tel:t});
-    LS.set("clientes", arr);
-    drawClientes();
+}
+document.getElementById("cAgregar").onclick = ()=>{
+  const n = document.getElementById("cNombre").value.trim();
+  if(!n) return alert("Nombre requerido");
+  const t = document.getElementById("cTel").value.trim();
+  const arr = LS.get("clientes",[]);
+  arr.unshift({nombre:n, tel:t});
+  LS.set("clientes", arr);
+  drawClientes();
+};
+
+// ====== BUSCADOR CLIENTE EN MEMBRESÍAS ======
+const mBuscar = document.getElementById("mBuscar");
+const mResultados = document.getElementById("mResultados");
+let mClienteSel = null;
+mBuscar.oninput = ()=>{
+  const q = mBuscar.value.toLowerCase().trim();
+  const arr = LS.get("clientes",[]);
+  const res = arr.filter(c=> c.nombre.toLowerCase().includes(q));
+  mResultados.innerHTML = res.map((c,i)=>`<div data-i="${i}">${c.nombre} ${c.tel?(" - "+c.tel):""}</div>`).join("");
+  mResultados.querySelectorAll("div").forEach(d=> d.onclick = ()=>{
+    const i = parseInt(d.dataset.i);
+    mClienteSel = res[i];
+    mBuscar.value = mClienteSel.nombre;
+    mResultados.innerHTML = "";
+  });
+};
+
+// ====== VENTAS ======
+let carrito = [];
+const carritoBody = document.querySelector("#tblCarrito tbody");
+function drawCarrito(){
+  carritoBody.innerHTML = "";
+  let total = 0;
+  carrito.forEach((it,idx)=>{
+    const sub = it.precio * it.cant; total += sub;
+    const img = it.imagen ? `<img src="${it.imagen}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #eee"/>` : "-";
+    carritoBody.innerHTML += `<tr><td>${it.nombre}</td><td>${img}</td><td>${it.cant}</td><td>$${it.precio}</td><td>$${sub}</td><td><button data-i="${idx}" class="del">X</button></td></tr>`;
+  });
+  document.getElementById("totalVenta").textContent = total;
+  document.querySelectorAll(".del").forEach(b=> b.onclick = ()=>{ carrito.splice(parseInt(b.dataset.i),1); drawCarrito(); });
+}
+document.getElementById("addProducto").onclick = () => {
+  const i = parseInt(document.getElementById("selProducto").value || 0);
+  const c = parseInt(document.getElementById("cantProducto").value||1);
+  const p = LS.get("productos",[])[i];
+  carrito.push({tipo:"producto", nombre:p.nombre, precio:p.precioVenta, cant:c, imagen:p.imagen||""});
+  drawCarrito();
+};
+document.getElementById("confirmarVenta").onclick = async () => {
+  if(!currentUser) return alert("Inicia sesión");
+  if(carrito.length===0) return alert("Agrega items");
+  const total = carrito.reduce((a,b)=> a + b.precio*b.cant, 0);
+  const venta = {fecha:new Date().toISOString(), tipo:"Producto", cliente:"-", metodo: document.getElementById("metodoPago").value, total, items:carrito};
+  const ventas = LS.get("ventas",[]); ventas.unshift(venta); LS.set("ventas", ventas);
+  showTicket(venta);
+  carrito = []; drawCarrito();
+};
+
+// ====== SERVICIOS / MEMBRESÍAS ======
+document.getElementById("mVender").onclick = ()=>{
+  const i = parseInt(document.getElementById("mTipo").value || 0);
+  const s = LS.get("servicios",[])[i];
+  const cli = mClienteSel ? mClienteSel.nombre : mBuscar.value.trim() || "Sin nombre";
+  const inicio = document.getElementById("mInicio").value;
+  const fin = document.getElementById("mFin").value;
+  const acceso = document.getElementById("mAcceso").checked;
+  const venta = {
+    fecha:new Date().toISOString(),
+    tipo:"Servicio",
+    cliente: cli,
+    metodo: "servicio",
+    total: s.precio,
+    items:[{nombre:s.servicio, cant:1, precio:s.precio}],
+    detalle:{inicio, fin, acceso}
+  };
+  const ventas = LS.get("ventas",[]); ventas.unshift(venta); LS.set("ventas", ventas);
+  document.getElementById("mMsg").textContent = "✅ Servicio vendido";
+  setTimeout(()=> document.getElementById("mMsg").textContent="", 1500);
+  showTicket(venta);
+};
+
+// ====== TICKET (modal + export) ======
+const ticketModal = document.getElementById("ticketModal");
+const ticketBody = document.getElementById("ticketBody");
+document.getElementById("tkClose").onclick = ()=> ticketModal.classList.add("hidden");
+document.getElementById("tkPrint").onclick = ()=> window.print();
+document.getElementById("tkIMG").onclick = async ()=>{
+  const area = document.getElementById("ticketArea");
+  const canvas = await html2canvas(area, {backgroundColor:"#fff", scale:2});
+  const link = document.createElement("a");
+  link.download = "ticket_dinamita.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+};
+document.getElementById("tkPDF").onclick = async ()=>{
+  const area = document.getElementById("ticketArea");
+  const canvas = await html2canvas(area, {backgroundColor:"#fff", scale:2});
+  const imgData = canvas.toDataURL("image/png");
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({unit:"pt", format:"a4"});
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const ratio = canvas.height / canvas.width;
+  const imgWidth = Math.min(pageWidth - 40, pageWidth);
+  const imgHeight = imgWidth * ratio;
+  pdf.addImage(imgData, "PNG", 20, 20, imgWidth, imgHeight);
+  pdf.save("ticket_dinamita.pdf");
+};
+function showTicket(venta){
+  ticketBody.innerHTML = `
+    <div><b>Fecha:</b> ${new Date(venta.fecha).toLocaleString()}</div>
+    <div><b>Tipo:</b> ${venta.tipo}</div>
+    ${venta.cliente? `<div><b>Cliente:</b> ${venta.cliente}</div>`: ""}
+    <hr/>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr><th style="text-align:left">Item</th><th>Cant</th><th>P.U.</th><th>Subt.</th></tr></thead>
+      <tbody>
+        ${venta.items.map(it=>`<tr><td>${it.nombre}</td><td style="text-align:center">${it.cant}</td><td style="text-align:center">$${it.precio}</td><td style="text-align:center">$${it.precio*it.cant}</td></tr>`).join("")}
+      </tbody>
+    </table>
+    <hr/>
+    <div style="text-align:right"><b>Total: $${venta.total}</b></div>
+    ${venta.detalle ? `<div style="margin-top:6px"><small>Inicio: ${venta.detalle.inicio||"-"} | Fin: ${venta.detalle.fin||"-"} | Acceso: ${venta.detalle.acceso? "Activado":"No"}</small></div>`: ""}
+  `;
+  ticketModal.classList.remove("hidden");
+}
+
+// ====== CATÁLOGO (CRUD + EDITOR CON IMAGEN) ======
+function buildCrud(tableEl, data, cols, onEdit){
+  const head = "<thead><tr>" + cols.map(c=>`<th>${c.label}</th>`).join("") + "<th></th></tr></thead>";
+  let body = "<tbody>";
+  data.forEach((row,i)=>{
+    body += "<tr>";
+    cols.forEach(c=>{
+      const val = row[c.key] ?? "";
+      if(c.key === "imagen"){
+        body += `<td>${val ? "<img src='"+val+"' style='width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #eee'/>" : "-"}</td>`;
+      } else {
+        body += `<td>${val}</td>`;
+      }
+    });
+    body += `<td>
+      <button class="btn-outline" data-edit="${i}">Editar</button>
+      <button class="btn-outline" data-del="${i}">Borrar</button>
+    </td>`;
+    body += "</tr>";
+  });
+  body += "</tbody>";
+  tableEl.innerHTML = head + body;
+
+  tableEl.querySelectorAll("[data-del]").forEach(btn=>{
+    btn.onclick = ()=>{ const i = parseInt(btn.dataset.del); data.splice(i,1); renderCatalogo(); };
+  });
+  tableEl.querySelectorAll("[data-edit]").forEach(btn=>{
+    btn.onclick = ()=>{ const i = parseInt(btn.dataset.edit); onEdit(i) };
+  });
+}
+
+let editIdx = -1;
+function renderCatalogo(){
+  const serv = LS.get("servicios",[]);
+  const prods = LS.get("productos",[]);
+  // Servicios simple
+  buildCrud(document.getElementById("tblServicios"), serv, [
+    {key:"servicio", label:"Servicio"},
+    {key:"tipo", label:"Tipo"},
+    {key:"segmento", label:"Segmento"},
+    {key:"precio", label:"Precio"}
+  ], ()=>{});
+  // Productos con imagen y editor
+  buildCrud(document.getElementById("tblProductos"), prods, [
+    {key:"sku", label:"SKU"},
+    {key:"nombre", label:"Nombre"},
+    {key:"categoria", label:"Categoría"},
+    {key:"precioVenta", label:"Precio Venta"},
+    {key:"stock", label:"Stock"},
+    {key:"imagen", label:"Imagen"}
+  ], (i)=> openEditorProducto(i));
+
+  document.getElementById("addRowServicio").onclick = ()=>{ serv.push({servicio:"Nuevo", tipo:"", segmento:"", precio:0}); LS.set("servicios",serv); renderCatalogo(); };
+  document.getElementById("addRowProducto").onclick = ()=>{ prods.push({sku:"", nombre:"Nuevo", categoria:"", precioVenta:0, precioCompra:"", stock:0, imagen:""}); LS.set("productos",prods); renderCatalogo(); };
+
+  document.getElementById("guardarCatalogo").onclick = ()=>{
+    LS.set("servicios",serv); LS.set("productos",prods);
+    document.getElementById("saveMsg").textContent="Guardado";
+    setTimeout(()=>document.getElementById("saveMsg").textContent="",1500);
+    render(); // refrescar selects y preview
   };
 }
 
-// Historial
+function openEditorProducto(i){
+  const prods = LS.get("productos",[]);
+  editIdx = i;
+  const p = prods[i];
+  const editor = document.getElementById("editorProducto");
+  editor.hidden = false;
+  document.getElementById("eNombre").value = p.nombre||"";
+  document.getElementById("eSKU").value = p.sku||"";
+  document.getElementById("eCategoria").value = p.categoria||"";
+  document.getElementById("ePrecioVenta").value = p.precioVenta||0;
+  document.getElementById("ePrecioCompra").value = p.precioCompra||"";
+  document.getElementById("eStock").value = p.stock||0;
+  document.getElementById("ePreview").innerHTML = p.imagen ? `<img src="${p.imagen}" style="max-width:140px;border:1px solid #eee;border-radius:8px"/>` : "<small class='muted'>Sin imagen</small>";
+}
+
+document.getElementById("eImagenFile").addEventListener("change", (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    const dataUrl = ev.target.result;
+    document.getElementById("ePreview").innerHTML = `<img src="${dataUrl}" style="max-width:140px;border:1px solid #eee;border-radius:8px"/>`;
+    // Guardar temporal en el objeto editado
+    const prods = LS.get("productos",[]);
+    if(editIdx>-1) prods[editIdx].imagen = dataUrl;
+    LS.set("productos", prods);
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById("eGuardar").onclick = ()=>{
+  const prods = LS.get("productos",[]);
+  if(editIdx<0) return;
+  const p = prods[editIdx];
+  p.nombre = document.getElementById("eNombre").value.trim();
+  p.sku = document.getElementById("eSKU").value.trim();
+  p.categoria = document.getElementById("eCategoria").value.trim();
+  p.precioVenta = parseFloat(document.getElementById("ePrecioVenta").value||0);
+  p.precioCompra = document.getElementById("ePrecioCompra").value;
+  p.stock = parseInt(document.getElementById("eStock").value||0);
+  LS.set("productos", prods);
+  document.getElementById("editorProducto").hidden = true;
+  renderCatalogo();
+  render();
+};
+
+document.getElementById("eCancelar").onclick = ()=>{
+  document.getElementById("editorProducto").hidden = true;
+  editIdx = -1;
+};
+
+// ====== HISTORIAL ======
 function drawHistorial(){
   const tb = document.querySelector("#tblHistorial tbody");
   const arr = LS.get("ventas",[]);
   tb.innerHTML = "";
-  arr.forEach(v=> tb.innerHTML += `<tr><td>${new Date(v.fecha).toLocaleString()}</td><td>${v.usuario}</td><td>${v.metodo}</td><td>$${v.total}</td></tr>`);
+  arr.forEach(v=> tb.innerHTML += `<tr><td>${new Date(v.fecha).toLocaleString()}</td><td>${v.tipo}</td><td>${v.cliente||"-"}</td><td>${v.metodo}</td><td>$${v.total}</td></tr>`);
 }
 
-// Init
+// ====== INIT ======
 function init(){
+  render();
   renderCatalogo();
-  drawInventario();
-  setupMembresias();
   drawClientes();
-  drawHistorial();
 }
 init();

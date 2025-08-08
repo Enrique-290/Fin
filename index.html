@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DINÁMITA POS (Demo local)</title>
+  <title>DINÁMITA POS (Light + Imágenes)</title>
   <link rel="stylesheet" href="styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
   <div class="app">
@@ -12,101 +14,141 @@
       <h1>DINÁMITA POS</h1>
       <div id="userBox">
         <input id="email" type="email" placeholder="tu correo"/>
-        <button id="btnLogin">Entrar</button>
+        <button id="btnLogin" class="btn-primary">Entrar</button>
       </div>
     </header>
 
     <nav id="nav" class="hidden">
       <button data-view="ventas">VENTAS</button>
-      <button data-view="catalogo">CATÁLOGO</button>
-      <button data-view="inventario">INVENTARIO</button>
-      <button data-view="membresias">MEMBRESÍAS</button>
+      <button data-view="membresias">SERVICIOS/MEMBRESÍAS</button>
       <button data-view="clientes">CLIENTES</button>
+      <button data-view="catalogo">CATÁLOGO</button>
       <button data-view="historial">HISTORIAL</button>
     </nav>
 
     <main>
+      <!-- VENTAS -->
       <section id="view-ventas" class="view hidden">
-        <h2>Ventas</h2>
+        <h2>Ventas (Productos)</h2>
         <div class="row">
           <div class="card">
-            <h3>Servicios</h3>
-            <select id="selServicio"></select>
-            <input id="cantServicio" type="number" min="1" value="1"/>
-            <button id="addServicio">Agregar</button>
-          </div>
-          <div class="card">
-            <h3>Productos</h3>
+            <h3>Seleccionar producto</h3>
             <select id="selProducto"></select>
+            <div id="previewProducto" class="preview"></div>
             <input id="cantProducto" type="number" min="1" value="1"/>
-            <button id="addProducto">Agregar</button>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Carrito</h3>
-          <table id="tblCarrito"><thead><tr><th>Item</th><th>Cant</th><th>P.U.</th><th>Subtotal</th><th></th></tr></thead><tbody></tbody></table>
-          <div class="totales">
             <select id="metodoPago">
               <option value="efectivo">Efectivo</option>
               <option value="tarjeta">Tarjeta</option>
               <option value="transferencia">Transferencia</option>
             </select>
-            <div>Total: $<span id="totalVenta">0</span></div>
-            <button id="confirmarVenta">Confirmar venta</button>
+            <button id="addProducto" class="btn-primary">Agregar</button>
           </div>
-          <p id="ticketMsg" class="ok"></p>
+          <div class="card">
+            <h3>Carrito</h3>
+            <table id="tblCarrito">
+              <thead><tr><th>Item</th><th>Imagen</th><th>Cant</th><th>P.U.</th><th>Subtotal</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div class="totales">
+              <div>Total: $<span id="totalVenta">0</span></div>
+              <button id="confirmarVenta" class="btn-primary">Finalizar compra</button>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="view-catalogo" class="view hidden">
-        <h2>Catálogo (CRUD)</h2>
+      <!-- SERVICIOS / MEMBRESÍAS -->
+      <section id="view-membresias" class="view hidden">
+        <h2>Vender Servicio / Membresía</h2>
         <div class="row">
           <div class="card">
-            <h3>Servicios</h3>
-            <table id="tblServicios" class="crud"></table>
-            <button id="addRowServicio">+ Agregar servicio</button>
+            <h3>Servicio</h3>
+            <select id="mTipo"></select>
+            <label>Cliente</label>
+            <input id="mBuscar" placeholder="Buscar cliente..."/>
+            <div id="mResultados" class="results"></div>
+            <label>Inicio</label>
+            <input id="mInicio" type="date"/>
+            <label>Fin</label>
+            <input id="mFin" type="date"/>
+            <label class="ck"><input type="checkbox" id="mAcceso"/> Control de acceso activado</label>
+            <button id="mVender" class="btn-primary">Vender servicio</button>
+            <p id="mMsg" class="ok"></p>
           </div>
-          <div class="card">
-            <h3>Productos</h3>
-            <table id="tblProductos" class="crud"></table>
-            <button id="addRowProducto">+ Agregar producto</button>
-          </div>
-        </div>
-        <button id="guardarCatalogo">Guardar cambios</button>
-        <span id="saveMsg" class="ok"></span>
-      </section>
-
-      <section id="view-inventario" class="view hidden">
-        <h2>Inventario</h2>
-        <table id="tblInv"><thead><tr><th>SKU</th><th>Producto</th><th>Categoría</th><th>Stock</th></tr></thead><tbody></tbody></table>
-      </section>
-
-      <section id="view-membresias" class="view hidden">
-        <h2>Registrar membresía</h2>
-        <div class="card">
-          <input id="mCli" placeholder="Nombre del cliente"/>
-          <select id="mTipo"></select>
-          <button id="mRegistrar">Registrar</button>
-          <p id="mMsg" class="ok"></p>
         </div>
       </section>
 
+      <!-- CLIENTES -->
       <section id="view-clientes" class="view hidden">
         <h2>Clientes</h2>
         <div class="card">
           <input id="cNombre" placeholder="Nombre"/>
           <input id="cTel" placeholder="Teléfono (opcional)"/>
-          <button id="cAgregar">Agregar cliente</button>
+          <button id="cAgregar" class="btn-primary">Agregar cliente</button>
         </div>
         <table id="tblClientes"><thead><tr><th>Nombre</th><th>Teléfono</th></tr></thead><tbody></tbody></table>
       </section>
 
+      <!-- CATÁLOGO -->
+      <section id="view-catalogo" class="view hidden">
+        <h2>Catálogo (Productos y Servicios)</h2>
+        <div class="row">
+          <div class="card">
+            <h3>Servicios (CRUD)</h3>
+            <table id="tblServicios" class="crud"></table>
+            <button id="addRowServicio" class="btn-outline">+ Agregar servicio</button>
+          </div>
+          <div class="card">
+            <h3>Productos (CRUD + Imágenes)</h3>
+            <table id="tblProductos" class="crud"></table>
+            <div class="editor" id="editorProducto" hidden>
+              <h4>Editar producto</h4>
+              <input id="eNombre" placeholder="Nombre"/>
+              <input id="eSKU" placeholder="SKU"/>
+              <input id="eCategoria" placeholder="Categoría"/>
+              <input id="ePrecioVenta" type="number" placeholder="Precio venta"/>
+              <input id="ePrecioCompra" type="number" placeholder="Precio compra (opcional)"/>
+              <input id="eStock" type="number" placeholder="Stock"/>
+              <div class="uploader">
+                <label>Imagen</label>
+                <input id="eImagenFile" type="file" accept="image/*"/>
+                <div id="ePreview" class="preview"></div>
+              </div>
+              <div class="editor-actions">
+                <button id="eGuardar" class="btn-primary">Guardar</button>
+                <button id="eCancelar" class="btn-outline">Cancelar</button>
+              </div>
+            </div>
+            <button id="addRowProducto" class="btn-outline">+ Agregar producto</button>
+          </div>
+        </div>
+        <button id="guardarCatalogo" class="btn-primary">Guardar cambios</button>
+        <span id="saveMsg" class="ok"></span>
+      </section>
+
+      <!-- HISTORIAL -->
       <section id="view-historial" class="view hidden">
-        <h2>Historial de ventas</h2>
-        <table id="tblHistorial"><thead><tr><th>Fecha</th><th>Usuario</th><th>Método</th><th>Total</th></tr></thead><tbody></tbody></table>
+        <h2>Historial</h2>
+        <table id="tblHistorial"><thead><tr><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Método</th><th>Total</th></tr></thead><tbody></tbody></table>
       </section>
     </main>
   </div>
+
+  <!-- MODAL TICKET -->
+  <div id="ticketModal" class="modal hidden">
+    <div class="modal-content" id="ticketArea">
+      <h3>DINÁMITA GYM - Ticket</h3>
+      <div id="ticketBody"></div>
+      <small>Gracias por tu compra</small>
+    </div>
+    <div class="modal-actions">
+      <button id="tkPrint" class="btn-outline">Imprimir</button>
+      <button id="tkPDF" class="btn-outline">Descargar PDF</button>
+      <button id="tkIMG" class="btn-outline">Descargar imagen</button>
+      <button id="tkClose" class="btn-danger">Cerrar</button>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
