@@ -1,47 +1,112 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dinamita POS</title>
-    <style>
-        body {
-            background-color: #111;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-        }
-        h1 {
-            color: red;
-        }
-        input, button {
-            margin: 10px;
-            padding: 10px;
-            font-size: 1em;
-        }
-        .module {
-            margin-top: 30px;
-        }
-        button {
-            background-color: red;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DINÁMITA POS (Demo local)</title>
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-    <h1>💥 Dinamita POS</h1>
-    <p>Ingresar correo para continuar:</p>
-    <input type="email" placeholder="Correo">
-    <button>Entrar</button>
+  <div class="app">
+    <header>
+      <h1>DINÁMITA POS</h1>
+      <div id="userBox">
+        <input id="email" type="email" placeholder="tu correo"/>
+        <button id="btnLogin">Entrar</button>
+      </div>
+    </header>
 
-    <div class="module">
-        <h2>Módulo de Control</h2>
-        <button>Registrar Membresía</button>
-        <button>Ver Calendario</button>
-    </div>
+    <nav id="nav" class="hidden">
+      <button data-view="ventas">VENTAS</button>
+      <button data-view="catalogo">CATÁLOGO</button>
+      <button data-view="inventario">INVENTARIO</button>
+      <button data-view="membresias">MEMBRESÍAS</button>
+      <button data-view="clientes">CLIENTES</button>
+      <button data-view="historial">HISTORIAL</button>
+    </nav>
+
+    <main>
+      <section id="view-ventas" class="view hidden">
+        <h2>Ventas</h2>
+        <div class="row">
+          <div class="card">
+            <h3>Servicios</h3>
+            <select id="selServicio"></select>
+            <input id="cantServicio" type="number" min="1" value="1"/>
+            <button id="addServicio">Agregar</button>
+          </div>
+          <div class="card">
+            <h3>Productos</h3>
+            <select id="selProducto"></select>
+            <input id="cantProducto" type="number" min="1" value="1"/>
+            <button id="addProducto">Agregar</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Carrito</h3>
+          <table id="tblCarrito"><thead><tr><th>Item</th><th>Cant</th><th>P.U.</th><th>Subtotal</th><th></th></tr></thead><tbody></tbody></table>
+          <div class="totales">
+            <select id="metodoPago">
+              <option value="efectivo">Efectivo</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="transferencia">Transferencia</option>
+            </select>
+            <div>Total: $<span id="totalVenta">0</span></div>
+            <button id="confirmarVenta">Confirmar venta</button>
+          </div>
+          <p id="ticketMsg" class="ok"></p>
+        </div>
+      </section>
+
+      <section id="view-catalogo" class="view hidden">
+        <h2>Catálogo (CRUD)</h2>
+        <div class="row">
+          <div class="card">
+            <h3>Servicios</h3>
+            <table id="tblServicios" class="crud"></table>
+            <button id="addRowServicio">+ Agregar servicio</button>
+          </div>
+          <div class="card">
+            <h3>Productos</h3>
+            <table id="tblProductos" class="crud"></table>
+            <button id="addRowProducto">+ Agregar producto</button>
+          </div>
+        </div>
+        <button id="guardarCatalogo">Guardar cambios</button>
+        <span id="saveMsg" class="ok"></span>
+      </section>
+
+      <section id="view-inventario" class="view hidden">
+        <h2>Inventario</h2>
+        <table id="tblInv"><thead><tr><th>SKU</th><th>Producto</th><th>Categoría</th><th>Stock</th></tr></thead><tbody></tbody></table>
+      </section>
+
+      <section id="view-membresias" class="view hidden">
+        <h2>Registrar membresía</h2>
+        <div class="card">
+          <input id="mCli" placeholder="Nombre del cliente"/>
+          <select id="mTipo"></select>
+          <button id="mRegistrar">Registrar</button>
+          <p id="mMsg" class="ok"></p>
+        </div>
+      </section>
+
+      <section id="view-clientes" class="view hidden">
+        <h2>Clientes</h2>
+        <div class="card">
+          <input id="cNombre" placeholder="Nombre"/>
+          <input id="cTel" placeholder="Teléfono (opcional)"/>
+          <button id="cAgregar">Agregar cliente</button>
+        </div>
+        <table id="tblClientes"><thead><tr><th>Nombre</th><th>Teléfono</th></tr></thead><tbody></tbody></table>
+      </section>
+
+      <section id="view-historial" class="view hidden">
+        <h2>Historial de ventas</h2>
+        <table id="tblHistorial"><thead><tr><th>Fecha</th><th>Usuario</th><th>Método</th><th>Total</th></tr></thead><tbody></tbody></table>
+      </section>
+    </main>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
