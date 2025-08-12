@@ -1,138 +1,263 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DINÁMITA POS (Light v2)</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>DINÁMITA POS — Menú Principal</title>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <style>
+:root{--bg:#fff;--text:#101010;--line:#e8e8e8;--accent:#e10600;--accent2:#b80400;--muted:#6b6b6b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
+.hidden{display:none}
+/* Sidebar */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:#fff;border-right:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:12px}
+.brand{display:flex;gap:10px;align-items:center}
+.logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#111 0,#333 35%,#111 100%);position:relative}
+.logo::after{content:"";position:absolute;inset:8px;border-radius:8px;border:2px solid var(--accent)}
+.brand-title{font-weight:900;color:#000;line-height:1}
+.brand-title span{color:var(--accent)}
+.userbox input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px}
+.btn{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+nav .item{width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:6px;cursor:pointer}
+nav .item.active, nav .item:hover{border-color:var(--accent);}
+/* Content */
+.content{margin-left:260px;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
+main{padding:16px;max-width:1100px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;text-align:left;font-size:16px;box-shadow:0 1px 2px rgba(0,0,0,.03);cursor:pointer}
+.tile:hover{border-color:var(--accent)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+input,select,textarea{padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left}
+.preview img{max-width:140px;border:1px solid var(--line);border-radius:8px}
+.actions{margin:8px 0}
+.drawer{position:fixed;right:12px;bottom:12px;top:72px;width:320px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.1);overflow:auto;z-index:9}
+.drawer-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.ck{display:flex;gap:8px;align-items:center}
+/* Status */
+.status{margin-top:8px;font-weight:700}
+.status.active{color:#1a7f37}
+.status.grace{color:#b08500}
+.status.expired{color:#b00020}
+/* Tabs */
+.tabs{display:flex;gap:8px;margin-bottom:8px}
+.tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer}
+.tab.active{border-color:var(--accent)}
+.tabv.hidden{display:none}
+/* Modal & ticket */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999}
+.modal-content{background:#fff;border-radius:12px;padding:14px;width:100%;max-width:480px}
+.ticket{border:1px solid var(--line);border-radius:10px;padding:12px}
+.tk-head{display:flex;justify-content:space-between;align-items:flex-start}
+.tk-logo{font-weight:900}
+.tk-logo span{color:var(--accent)}
+.tk-meta{font-size:12px;color:#555;text-align:right}
+.tk-table th,.tk-table td{text-align:left;font-size:12px}
+.tk-table th:nth-child(2),.tk-table td:nth-child(2),
+.tk-table th:nth-child(3),.tk-table td:nth-child(3),
+.tk-table th:nth-child(4),.tk-table td:nth-child(4){text-align:center}
+.tk-total{display:flex;justify-content:space-between;align-items:center;background:#fff4f4;border:1px solid #ffd6d6;border-radius:8px;padding:6px 10px;margin-top:8px;font-weight:800}
+.tk-total div:last-child{color:var(--accent)}
+.tk-foot{text-align:center;color:#555;font-size:12px;margin-top:6px}
+.modal-actions{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+@media (max-width:880px){ .sidebar{width:220px} .content{margin-left:220px} }
+@media (max-width:720px){ .sidebar{position:static;width:auto;border-right:none} .content{margin-left:0} }
+  </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <h1>DINÁMITA POS</h1>
-      <div id="userBox">
-        <input id="email" type="email" placeholder="tu correo"/>
-        <button id="btnLogin" class="btn-primary">Entrar</button>
-      </div>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div class="brand-title">DINÁMITA<br/><span>POS</span></div>
+    </div>
+    <div class="userbox">
+      <input id="email" type="email" placeholder="tu correo"/>
+      <button id="btnLogin" class="btn primary">Entrar</button>
+      <div id="logged" class="hidden"></div>
+    </div>
+    <nav id="menu" class="hidden">
+      <button data-view="home" class="item active">🏠 Menú</button>
+      <button data-view="ventas" class="item">🧾 Ventas</button>
+      <button data-view="inventario" class="item">📦 Inventario</button>
+      <button data-view="controlMensual" class="item">📅 Control de Membresías</button>
+      <button data-view="clientes" class="item">👤 Clientes</button>
+      <button data-view="reportes" class="item">📊 Reportes</button>
+      <button data-view="config" class="item">⚙️ Configuración</button>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <h1>Menú Principal</h1>
     </header>
 
-    <nav id="nav" class="hidden">
-      <button data-view="ventas">VENTAS</button>
-      <button data-view="membresias">SERVICIOS/MEMBRESÍAS</button>
-      <button data-view="clientes">CLIENTES</button>
-      <button data-view="catalogo">CATÁLOGO</button>
-      <button data-view="historial">HISTORIAL</button>
-    </nav>
+    <!-- HOME -->
+    <section id="view-home" class="view">
+      <div class="grid">
+        <div class="tile" data-view="ventas">🧾 Ventas</div>
+        <div class="tile" data-view="inventario">📦 Inventario</div>
+        <div class="tile" data-view="controlMensual">📅 Control de Membresías</div>
+        <div class="tile" data-view="clientes">👤 Clientes</div>
+        <div class="tile" data-view="reportes">📊 Reportes</div>
+        <div class="tile" data-view="config">⚙️ Configuración</div>
+      </div>
+    </section>
 
-    <main>
-      <!-- VENTAS -->
-      <section id="view-ventas" class="view hidden">
-        <h2>Ventas (Productos)</h2>
-        <div class="row">
-          <div class="card">
-            <h3>Seleccionar producto</h3>
-            <select id="selProducto"></select>
-            <div id="previewProducto" class="preview"></div>
-            <input id="cantProducto" type="number" min="1" value="1"/>
+    <!-- VENTAS -->
+    <section id="view-ventas" class="view hidden">
+      <h2>Ventas</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>Productos</h3>
+          <select id="selProducto"></select>
+          <div id="prevProducto" class="preview"></div>
+          <input id="cantProducto" type="number" value="1" min="1"/>
+          <button id="addProducto" class="btn primary">Agregar</button>
+        </div>
+        <div class="card">
+          <h3>Servicios</h3>
+          <select id="selServicio"></select>
+          <div class="row">
+            <label>Cliente</label>
+            <input id="clienteVenta" placeholder="Nombre del cliente"/>
+          </div>
+          <div class="row">
+            <label>Inicio</label>
+            <input id="mInicio" type="date"/>
+            <label>Fin</label>
+            <input id="mFin" type="date"/>
+          </div>
+          <label class="ck"><input id="mAcceso" type="checkbox"/> Control de acceso activado</label>
+          <button id="addServicio" class="btn primary">Agregar</button>
+        </div>
+        <div class="card">
+          <h3>Carrito</h3>
+          <table id="tblCarrito">
+            <thead><tr><th>Item</th><th>Cant</th><th>P.U.</th><th>Subtotal</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="totales">Total: $<span id="totalVenta">0</span></div>
+          <div class="row">
             <select id="metodoPago">
               <option value="efectivo">Efectivo</option>
               <option value="tarjeta">Tarjeta</option>
               <option value="transferencia">Transferencia</option>
             </select>
-            <button id="addProducto" class="btn-primary">Agregar</button>
-          </div>
-          <div class="card">
-            <h3>Carrito</h3>
-            <table id="tblCarrito">
-              <thead><tr><th>Item</th><th>Imagen</th><th>Cant</th><th>P.U.</th><th>Subtotal</th><th></th></tr></thead>
-              <tbody></tbody>
-            </table>
-            <div class="totales">
-              <div>Total: $<span id="totalVenta">0</span></div>
-              <button id="confirmarVenta" class="btn-primary">Finalizar compra</button>
-            </div>
+            <button id="finalizar" class="btn primary">Finalizar compra</button>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- SERVICIOS / MEMBRESÍAS -->
-      <section id="view-membresias" class="view hidden">
-        <h2>Vender Servicio / Membresía</h2>
+    <!-- INVENTARIO (con tabs) -->
+    <section id="view-inventario" class="view hidden">
+      <h2>Inventario</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="prods">Productos</button>
+        <button class="tab" data-tab="srvs">Servicios</button>
+      </div>
+      <div id="tab-prods" class="tabv">
+        <div class="actions"><button id="addProd" class="btn">+ Agregar producto</button></div>
+        <table id="tblProductos">
+          <thead><tr><th>SKU</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Imagen</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div id="editorProducto" class="drawer hidden">
+          <h3>Producto</h3>
+          <input id="pSKU" placeholder="SKU"/>
+          <input id="pNombre" placeholder="Nombre"/>
+          <input id="pCategoria" placeholder="Categoría"/>
+          <input id="pPrecio" type="number" placeholder="Precio venta"/>
+          <input id="pStock" type="number" placeholder="Stock"/>
+          <label class="file">Imagen
+            <input id="pImagen" type="file" accept="image/*"/>
+          </label>
+          <div id="pPreview" class="preview"></div>
+          <div class="drawer-actions">
+            <button id="pGuardar" class="btn primary">Guardar</button>
+            <button id="pCerrar" class="btn">Cerrar</button>
+          </div>
+        </div>
+      </div>
+      <div id="tab-srvs" class="tabv hidden">
+        <div class="actions"><button id="addSrv" class="btn">+ Agregar servicio</button></div>
+        <table id="tblServicios">
+          <thead><tr><th>Nombre</th><th>Tipo</th><th>Segmento</th><th>Precio</th><th>Duración (días)</th><th>Promo</th><th>Activo</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CLIENTES -->
+    <section id="view-clientes" class="view hidden">
+      <h2>Clientes</h2>
+      <div class="card">
+        <input id="cNombre" placeholder="Nombre completo"/>
+        <input id="cTel" placeholder="Teléfono (opcional)"/>
         <div class="row">
-          <div class="card">
-            <h3>Servicio</h3>
-            <select id="mTipo"></select>
-            <label>Cliente</label>
-            <input id="mBuscar" placeholder="Buscar cliente..."/>
-            <div id="mResultados" class="results"></div>
-            <label>Inicio</label>
-            <input id="mInicio" type="date"/>
-            <label>Fin</label>
-            <input id="mFin" type="date"/>
-            <label class="ck"><input type="checkbox" id="mAcceso"/> Control de acceso activado</label>
-            <button id="mVender" class="btn-primary">Vender servicio</button>
-            <p id="mMsg" class="ok"></p>
-          </div>
+          <label class="ck"><input id="cCert" type="checkbox"/> Presentó certificado médico</label>
+          <input id="cEdad" type="number" placeholder="Edad (años)"/>
+          <input id="cPeso" type="number" step="0.1" placeholder="Peso (kg)"/>
+          <input id="cAnios" type="number" placeholder="Años entrenando"/>
         </div>
-      </section>
+        <input id="cPade" placeholder="Padecimientos"/>
+        <textarea id="cObs" rows="3" placeholder="Observaciones del gym"></textarea>
+        <label class="ck"><input id="confMostrarMed" type="checkbox"/> Mostrar datos médicos en ticket</label>
+        <button id="cGuardar" class="btn primary">Guardar cliente</button>
+      </div>
+      <table id="tblClientes">
+        <thead><tr><th>Nombre</th><th>Tel</th><th>Edad</th><th>Peso</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
 
-      <!-- CLIENTES -->
-      <section id="view-clientes" class="view hidden">
-        <h2>Clientes</h2>
-        <div class="card">
-          <input id="cNombre" placeholder="Nombre"/>
-          <input id="cTel" placeholder="Teléfono (opcional)"/>
-          <button id="cAgregar" class="btn-primary">Agregar cliente</button>
-        </div>
-        <table id="tblClientes"><thead><tr><th>Nombre</th><th>Teléfono</th></tr></thead><tbody></tbody></table>
-      </section>
-
-      <!-- CATÁLOGO -->
-      <section id="view-catalogo" class="view hidden">
-        <h2>Catálogo (Productos y Servicios)</h2>
+    <!-- CONTROL MENSUALIDADES -->
+    <section id="view-controlMensual" class="view hidden">
+      <h2>Control de Membresías</h2>
+      <div class="card">
+        <input id="buscarCliente" placeholder="Buscar cliente..."/>
+        <button id="btnBuscarCliente" class="btn">Buscar</button>
+        <div id="estadoMensualidad" class="status">—</div>
         <div class="row">
-          <div class="card">
-            <h3>Servicios (CRUD)</h3>
-            <table id="tblServicios" class="crud"></table>
-            <button id="addRowServicio" class="btn-outline">+ Agregar servicio</button>
-          </div>
-          <div class="card">
-            <h3>Productos (CRUD + Imágenes)</h3>
-            <table id="tblProductos" class="crud"></table>
-            <div class="editor" id="editorProducto" hidden>
-              <h4>Editar producto</h4>
-              <input id="eNombre" placeholder="Nombre"/>
-              <input id="eSKU" placeholder="SKU"/>
-              <input id="eCategoria" placeholder="Categoría"/>
-              <input id="ePrecioVenta" type="number" placeholder="Precio venta"/>
-              <input id="ePrecioCompra" type="number" placeholder="Precio compra (opcional)"/>
-              <input id="eStock" type="number" placeholder="Stock"/>
-              <div class="uploader">
-                <label>Imagen</label>
-                <input id="eImagenFile" type="file" accept="image/*"/>
-                <div id="ePreview" class="preview"></div>
-              </div>
-              <div class="editor-actions">
-                <button id="eGuardar" class="btn-primary">Guardar</button>
-                <button id="eCancelar" class="btn-outline">Cancelar</button>
-              </div>
-            </div>
-            <button id="addRowProducto" class="btn-outline">+ Agregar producto</button>
-          </div>
+          <button id="renovarContinuidad" class="btn">Renovar (Continuidad)</button>
+          <button id="renovarNueva" class="btn">Nueva mensualidad</button>
+          <button id="registrarAcceso" class="btn">Registrar acceso</button>
         </div>
-        <button id="guardarCatalogo" class="btn-primary">Guardar cambios</button>
-        <span id="saveMsg" class="ok"></span>
-      </section>
+      </div>
+      <div id="historialCliente" class="card"></div>
+    </section>
 
-      <!-- HISTORIAL -->
-      <section id="view-historial" class="view hidden">
-        <h2>Historial</h2>
-        <table id="tblHistorial"><thead><tr><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Método</th><th>Total</th></tr></thead><tbody></tbody></table>
-      </section>
-    </main>
-  </div>
+    <!-- REPORTES (placeholder) -->
+    <section id="view-reportes" class="view hidden">
+      <h2>Reportes</h2>
+      <div class="card">
+        <p>En la siguiente actualización agregamos:</p>
+        <ul>
+          <li>Ventas por día/mes</li>
+          <li>Ranking VIP / Socio Dinamita</li>
+          <li>Exportar PDF/Excel</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CONFIG -->
+    <section id="view-config" class="view hidden">
+      <h2>Configuración</h2>
+      <div class="card">
+        <label class="ck"><input id="cfgMostrarMed" type="checkbox"/> Mostrar datos médicos en ticket</label>
+        <label>Gracia (días)</label>
+        <input id="cfgGracia" type="number" value="1" min="0" max="5"/>
+        <p class="muted">El periodo de mensualidad se calcula de misma fecha a mismo día del siguiente mes.</p>
+      </div>
+    </section>
+  </main>
 
   <!-- MODAL TICKET -->
   <div id="ticketModal" class="modal hidden">
@@ -145,27 +270,291 @@
             <div id="tkFecha"></div>
           </div>
         </div>
-        <div class="tk-body">
-          <div id="tkCliente"></div>
-          <table class="tk-table">
-            <thead><tr><th>Concepto</th><th>Cant</th><th>P.U.</th><th>Subt.</th></tr></thead>
-            <tbody id="tkItems"></tbody>
-          </table>
-        </div>
-        <div class="tk-total">
-          <div>Total</div><div id="tkTotal"></div>
-        </div>
+        <div id="tkCliente"></div>
+        <table class="tk-table">
+          <thead><tr><th>Concepto</th><th>Cant</th><th>P.U.</th><th>Subt.</th></tr></thead>
+          <tbody id="tkItems"></tbody>
+        </table>
+        <div class="tk-total"><div>Total</div><div id="tkTotal"></div></div>
         <div class="tk-foot">Gracias por tu compra 💥</div>
       </div>
       <div class="modal-actions">
-        <button id="tkPrint" class="btn-outline">Imprimir</button>
-        <button id="tkPDF" class="btn-outline">Descargar PDF</button>
-        <button id="tkIMG" class="btn-outline">Descargar imagen</button>
-        <button id="tkClose" class="btn-danger">Cerrar</button>
+        <button id="tkPrint" class="btn">Imprimir</button>
+        <button id="tkPDF" class="btn">Descargar PDF</button>
+        <button id="tkIMG" class="btn">Descargar imagen</button>
+        <button id="tkClose" class="btn primary">Cerrar</button>
       </div>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+// ====== STORAGE ======
+const LS = { get:k=>JSON.parse(localStorage.getItem(k)||"null"), set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)) };
+if(!LS.get("productos")) LS.set("productos",[
+  {sku:"", nombre:"Agua Bonafont 1L", categoria:"Agua", precio:14, stock:20, imagen:""},
+  {sku:"", nombre:"Gatorade 600ml", categoria:"Hidratante", precio:20, stock:20, imagen:""},
+  {sku:"", nombre:"Volt Blue", categoria:"Energética", precio:22, stock:20, imagen:""}
+]);
+if(!LS.get("servicios")) LS.set("servicios",[
+  {nombre:"Mensualidad normal", tipo:"Membresía", segmento:"Normal", precio:350, dur:30, promo:false, activo:true},
+  {nombre:"Visita 1 día", tipo:"Visita", segmento:"", precio:25, dur:1, promo:false, activo:true}
+]);
+if(!LS.get("clientes")) LS.set("clientes",[]);
+if(!LS.get("ventas")) LS.set("ventas",[]);
+if(!LS.get("cfg")) LS.set("cfg",{mostrarMed:false, gracia:1});
+
+// ====== LOGIN ======
+const allowed = ["enri290@gmail.com","dinamitagym00@gmail.com"];
+let currentUser = null;
+document.getElementById("btnLogin").onclick = ()=>{
+  const mail = document.getElementById("email").value.trim().toLowerCase();
+  if(allowed.includes(mail)){
+    currentUser = mail;
+    document.getElementById("logged").textContent = mail;
+    document.getElementById("logged").classList.remove("hidden");
+    document.getElementById("btnLogin").classList.add("hidden");
+    document.getElementById("email").classList.add("hidden");
+    document.getElementById("menu").classList.remove("hidden");
+    go("home");
+  } else alert("Correo no autorizado");
+};
+
+// ====== NAV ======
+document.querySelectorAll(".tile").forEach(t=> t.onclick=()=>go(t.dataset.view));
+document.querySelectorAll("nav .item").forEach(btn=> btn.onclick = ()=> go(btn.dataset.view));
+function go(view){
+  document.querySelectorAll("nav .item").forEach(i=> i.classList.remove("active"));
+  document.querySelector(`nav .item[data-view='${view}']`)?.classList.add("active");
+  document.querySelectorAll(".view").forEach(v=> v.classList.add("hidden"));
+  document.getElementById("view-"+view).classList.remove("hidden");
+  document.querySelector(".topbar h1").textContent = (
+    view==="home" ? "Menú Principal" :
+    view==="ventas" ? "Ventas" :
+    view==="inventario" ? "Inventario" :
+    view==="controlMensual" ? "Control de Membresías" :
+    view==="clientes" ? "Clientes" :
+    view==="reportes" ? "Reportes" : "Configuración"
+  );
+}
+
+// ====== Tabs inventario ======
+document.addEventListener("click",(e)=>{
+  if(e.target.classList.contains("tab")){
+    document.querySelectorAll(".tab").forEach(t=> t.classList.remove("active"));
+    e.target.classList.add("active");
+    document.querySelectorAll(".tabv").forEach(v=> v.classList.add("hidden"));
+    document.getElementById("tab-"+e.target.dataset.tab).classList.remove("hidden");
+  }
+});
+
+// ====== Utils ======
+const dinero = n => (Math.round(n*100)/100).toFixed(2);
+const addMonthsSameDay = (date, months)=>{ const d=new Date(date); d.setMonth(d.getMonth()+months); return d; };
+
+// ====== Ventas ======
+let carrito = [];
+function renderVentas(){
+  const prods = LS.get("productos");
+  const selP = document.getElementById("selProducto");
+  selP.innerHTML = prods.map((p,i)=>`<option value="${i}">${p.nombre} - $${p.precio}</option>`).join("");
+  selP.onchange = ()=>{
+    const i = parseInt(selP.value||0); const p=prods[i];
+    document.getElementById("prevProducto").innerHTML = p.imagen? `<img src="${p.imagen}"/>`:"<small class='muted'>Sin imagen</small>`";
+  };
+  selP.onchange();
+  const srv = LS.get("servicios").filter(s=>s.activo);
+  const selS = document.getElementById("selServicio");
+  selS.innerHTML = srv.map((s,i)=>`<option value="${i}">${s.nombre} - $${s.precio}</option>`).join("");
+  drawCarrito();
+}
+function drawCarrito(){
+  const tb = document.querySelector("#tblCarrito tbody"); tb.innerHTML=""; let total=0;
+  carrito.forEach((it,i)=>{ const sub=it.precio*it.cant; total+=sub;
+    tb.innerHTML += `<tr><td>${it.nombre}</td><td>${it.cant}</td><td>$${dinero(it.precio)}</td><td>$${dinero(sub)}</td><td><button class="btn" data-i="${i}">X</button></td></tr>`;
+  });
+  tb.querySelectorAll("[data-i]").forEach(b=> b.onclick = ()=>{ carrito.splice(parseInt(b.dataset.i),1); drawCarrito(); });
+  document.getElementById("totalVenta").textContent = dinero(total);
+}
+document.getElementById("addProducto").onclick = ()=>{
+  const i = parseInt(document.getElementById("selProducto").value||0);
+  const cant = parseInt(document.getElementById("cantProducto").value||1);
+  const p = LS.get("productos")[i];
+  carrito.push({tipo:"producto", nombre:p.nombre, precio:p.precio, cant});
+  drawCarrito();
+};
+document.getElementById("addServicio").onclick = ()=>{
+  const arr = LS.get("servicios").filter(s=>s.activo);
+  const i = parseInt(document.getElementById("selServicio").value||0);
+  const s = arr[i];
+  const cli = document.getElementById("clienteVenta").value.trim()||"Sin nombre";
+  let inicio = document.getElementById("mInicio").value;
+  if(!inicio){ const d = new Date(); inicio = d.toISOString().slice(0,10); }
+  let fin = document.getElementById("mFin").value;
+  if(!fin){
+    if(s.tipo==="Membresía" && s.dur>=28){ const d=new Date(inicio+"T00:00:00"); fin = addMonthsSameDay(d,1).toISOString().slice(0,10); }
+    else{ const d=new Date(inicio+"T00:00:00"); d.setDate(d.getDate()+(s.dur||1)); fin = d.toISOString().slice(0,10); }
+  }
+  const acceso = document.getElementById("mAcceso").checked;
+  carrito.push({tipo:"servicio", nombre:s.nombre, precio:s.precio, cant:1, cliente:cli, detalle:{inicio,fin,acceso}});
+  drawCarrito();
+};
+document.getElementById("finalizar").onclick = ()=>{
+  if(carrito.length===0) return alert("Agrega items");
+  const total = carrito.reduce((a,b)=> a + b.precio*b.cant, 0);
+  const venta = {fecha:new Date().toISOString(), metodo:document.getElementById("metodoPago").value, total, items:carrito};
+  const ventas = LS.get("ventas"); ventas.unshift(venta); LS.set("ventas",ventas);
+  showTicket(venta);
+  carrito = []; drawCarrito();
+};
+
+// ====== Inventario Productos ======
+let editIdx = -1;
+function drawProductos(){
+  const tb = document.querySelector("#tblProductos tbody"); tb.innerHTML="";
+  const arr = LS.get("productos");
+  arr.forEach((p,i)=>{
+    tb.innerHTML += `<tr>
+      <td>${p.sku||""}</td><td>${p.nombre}</td><td>${p.categoria||""}</td><td>$${dinero(p.precio)}</td><td>${p.stock||0}</td>
+      <td>${p.imagen? "<img src='"+p.imagen+"' style='width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid #eee'/>":"-"}</td>
+      <td><button class="btn" data-edit="${i}">Editar</button> <button class="btn" data-del="${i}">Borrar</button></td>
+    </tr>`;
+  });
+  tb.querySelectorAll("[data-del]").forEach(b=> b.onclick = ()=>{ const i=parseInt(b.dataset.del); arr.splice(i,1); LS.set("productos",arr); drawProductos(); renderVentas(); });
+  tb.querySelectorAll("[data-edit]").forEach(b=> b.onclick = ()=> openEditorProducto(parseInt(b.dataset.edit)));
+}
+document.getElementById("addProd").onclick = ()=>{
+  const arr = LS.get("productos"); arr.unshift({sku:"",nombre:"Nuevo producto",categoria:"",precio:0,stock:0,imagen:""});
+  LS.set("productos",arr); drawProductos(); renderVentas();
+};
+function openEditorProducto(i){
+  editIdx = i;
+  const p = LS.get("productos")[i];
+  const drawer = document.getElementById("editorProducto");
+  drawer.classList.remove("hidden");
+  pSKU.value = p.sku||""; pNombre.value = p.nombre||""; pCategoria.value = p.categoria||""; pPrecio.value = p.precio||0; pStock.value = p.stock||0;
+  pPreview.innerHTML = p.imagen? `<img src="${p.imagen}"/>`:"<small class='muted'>Sin imagen</small>";
+}
+pImagen.addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader(); r.onload = ev=>{
+    const arr = LS.get("productos"); arr[editIdx].imagen = ev.target.result; LS.set("productos",arr);
+    pPreview.innerHTML = `<img src="${ev.target.result}"/>`; drawProductos(); renderVentas();
+  }; r.readAsDataURL(f);
+});
+pGuardar.onclick = ()=>{
+  const arr = LS.get("productos"); if(editIdx<0) return;
+  const p = arr[editIdx]; p.sku=pSKU.value.trim(); p.nombre=pNombre.value.trim(); p.categoria=pCategoria.value.trim();
+  p.precio=parseFloat(pPrecio.value||0); p.stock=parseInt(pStock.value||0);
+  LS.set("productos",arr); editorProducto.classList.add("hidden"); drawProductos(); renderVentas();
+};
+pCerrar.onclick = ()=> editorProducto.classList.add("hidden");
+
+// ====== Inventario Servicios ======
+function drawServicios(){
+  const tb = document.querySelector("#tblServicios tbody"); tb.innerHTML="";
+  const arr = LS.get("servicios");
+  arr.forEach((s,i)=>{
+    tb.innerHTML += `<tr>
+      <td contenteditable data-k="nombre" data-i="${i}">${s.nombre}</td>
+      <td contenteditable data-k="tipo" data-i="${i}">${s.tipo}</td>
+      <td contenteditable data-k="segmento" data-i="${i}">${s.segmento||""}</td>
+      <td contenteditable data-k="precio" data-i="${i}">${s.precio}</td>
+      <td contenteditable data-k="dur" data-i="${i}">${s.dur}</td>
+      <td><input type="checkbox" data-k="promo" data-i="${i}" ${s.promo?"checked":""}></td>
+      <td><input type="checkbox" data-k="activo" data-i="${i}" ${s.activo?"checked":""}></td>
+      <td><button class="btn" data-del="${i}">Borrar</button></td>
+    </tr>`;
+  });
+  tb.querySelectorAll("[data-del]").forEach(b=> b.onclick = ()=>{ const i=parseInt(b.dataset.del); arr.splice(i,1); LS.set("servicios",arr); drawServicios(); renderVentas(); });
+  tb.querySelectorAll("[contenteditable]").forEach(el=> el.addEventListener("blur", ()=>{
+    const i=parseInt(el.dataset.i); const k=el.dataset.k; const arr=LS.get("servicios");
+    arr[i][k] = (k==="precio"||k==="dur") ? parseFloat(el.textContent||0) : el.textContent.trim();
+    LS.set("servicios",arr); renderVentas();
+  }));
+  tb.querySelectorAll("input[type=checkbox]").forEach(ch=> ch.onchange = ()=>{
+    const i=parseInt(ch.dataset.i); const k=ch.dataset.k; const arr=LS.get("servicios"); arr[i][k]=ch.checked; LS.set("servicios",arr); renderVentas();
+  });
+}
+document.getElementById("addSrv").onclick = ()=>{
+  const arr = LS.get("servicios"); arr.unshift({nombre:"Nuevo servicio", tipo:"Membresía", segmento:"", precio:0, dur:30, promo:false, activo:true}); LS.set("servicios",arr); drawServicios(); renderVentas();
+};
+
+// ====== Control Membresías ======
+function estadoMensu(fin, gracia){
+  const hoy = new Date(); const f = new Date(fin+"T00:00:00");
+  const diff = Math.floor((hoy - f)/(1000*60*60*24));
+  if(diff < 0) return "active"; if(diff <= gracia) return "grace"; return "expired";
+}
+btnBuscarCliente.onclick = ()=>{
+  const q = (buscarCliente.value||"").toLowerCase();
+  const cli = (LS.get("clientes")||[]).find(c=> (c.nombre||"").toLowerCase().includes(q));
+  if(!cli){ estadoMensualidad.textContent="No encontrado"; estadoMensualidad.className="status"; historialCliente.innerHTML=""; return; }
+  const hist = cli.historial||[];
+  if(hist.length===0){ estadoMensualidad.textContent="Sin membresías"; estadoMensualidad.className="status"; }
+  else{
+    const u = hist[0]; const st = estadoMensu(u.fin, LS.get("cfg").gracia||1);
+    estadoMensualidad.textContent = `Estado: ${st==="active"?"Activa": st==="grace"?"En gracia":"Vencida"} — Último periodo ${u.inicio} a ${u.fin}`;
+    estadoMensualidad.className = "status " + (st==="active"?"active": st==="grace"?"grace":"expired");
+  }
+  historialCliente.innerHTML = "<h4>Historial</h4>" + (hist.map(h=>`<div>• ${h.tipo}: ${h.inicio} → ${h.fin}</div>`).join("")||"");
+};
+renovarContinuidad.onclick = ()=> renovar(true);
+renovarNueva.onclick = ()=> renovar(false);
+function renovar(continuidad){
+  const q = (buscarCliente.value||"").toLowerCase();
+  let cli = (LS.get("clientes")||[]).find(c=> (c.nombre||"").toLowerCase().includes(q));
+  if(!cli){ alert("Busca un cliente primero"); return; }
+  const serv = LS.get("servicios").find(s=> s.tipo==="Membresía" && s.activo);
+  if(!serv){ alert("No hay servicio activo de membresía"); return; }
+  const hoyStr = new Date().toISOString().slice(0,10);
+  let inicio = hoyStr; if(continuidad && cli.historial?.[0]) inicio = cli.historial[0].fin;
+  let fin; if(serv.dur>=28){ fin = addMonthsSameDay(new Date(inicio+"T00:00:00"),1).toISOString().slice(0,10); } else { const d=new Date(inicio+"T00:00:00"); d.setDate(d.getDate()+serv.dur); fin=d.toISOString().slice(0,10); }
+  cli.historial = cli.historial || []; cli.historial.unshift({tipo:serv.nombre, inicio, fin});
+  const clientes = (LS.get("clientes")||[]).map(c=> c.nombre===cli.nombre? cli : c); LS.set("clientes",clientes);
+  btnBuscarCliente.click(); alert("Renovación registrada");
+}
+registrarAcceso.onclick = ()=> alert("Registro de acceso anotado (placeholder) — se agregará en la siguiente actualización");
+
+// ====== Clientes ======
+cGuardar.onclick = ()=>{
+  const c = { nombre:cNombre.value.trim(), tel:cTel.value.trim(), cert:cCert.checked, edad:parseInt(cEdad.value||0), peso:parseFloat(cPeso.value||0), anios:parseInt(cAnios.value||0), pade:cPade.value.trim(), obs:cObs.value.trim(), mostrarMed:confMostrarMed.checked, historial:[] };
+  if(!c.nombre) return alert("Nombre requerido");
+  const arr = LS.get("clientes"); arr.unshift(c); LS.set("clientes",arr); drawClientes(); alert("Cliente guardado");
+};
+function drawClientes(){
+  const tb = document.querySelector("#tblClientes tbody"); tb.innerHTML="";
+  (LS.get("clientes")||[]).forEach(cli=> tb.innerHTML += `<tr><td>${cli.nombre}</td><td>${cli.tel||""}</td><td>${cli.edad||""}</td><td>${cli.peso||""}</td></tr>`);
+}
+
+// ====== Config ======
+function drawConfig(){
+  const cfg = LS.get("cfg"); cfgMostrarMed.checked = !!cfg.mostrarMed; cfgGracia.value = cfg.gracia ?? 1;
+  cfgMostrarMed.onchange = ()=>{ cfg.mostrarMed = cfgMostrarMed.checked; LS.set("cfg",cfg); };
+  cfgGracia.onchange = ()=>{ cfg.gracia = parseInt(cfgGracia.value||1); LS.set("cfg",cfg); };
+}
+
+// ====== Ticket ======
+const ticketModal = document.getElementById("ticketModal");
+function openModal(){ ticketModal.classList.remove("hidden"); }
+function closeModal(){ ticketModal.classList.add("hidden"); go("home"); } // vuelve al Menú
+tkClose.onclick = closeModal;
+ticketModal.addEventListener("click",(e)=>{ const ar=document.getElementById("ticketArea"); if(!ar.contains(e.target)) closeModal(); });
+function showTicket(venta){
+  tkFecha.textContent = new Date(venta.fecha).toLocaleString();
+  const firstCli = venta.items.find(i=> i.cliente)?.cliente || "";
+  tkCliente.textContent = firstCli? ("Cliente: "+firstCli) : "";
+  const tb = document.getElementById("tkItems"); tb.innerHTML="";
+  venta.items.forEach(it=> tb.innerHTML += `<tr><td>${it.nombre}${it.detalle? ` <small>(${it.detalle.inicio} → ${it.detalle.fin})</small>`:""}</td><td>${it.cant}</td><td>$${dinero(it.precio)}</td><td>$${dinero(it.precio*it.cant)}</td></tr>`);
+  tkTotal.textContent = "$"+dinero(venta.total);
+  openModal();
+}
+tkPrint.onclick = ()=>{ window.onafterprint = ()=>closeModal(); window.print(); setTimeout(closeModal,1200); };
+tkIMG.onclick = async ()=>{ try{ const canvas = await html2canvas(ticketArea,{backgroundColor:"#fff",scale:2}); const a=document.createElement("a"); a.download="ticket.png"; a.href=canvas.toDataURL("image/png"); a.click(); setTimeout(closeModal,400);}catch(e){ closeModal(); } };
+tkPDF.onclick = async ()=>{ try{ const canvas = await html2canvas(ticketArea,{backgroundColor:"#fff",scale:2}); const img = canvas.toDataURL("image/png"); const { jsPDF } = window.jspdf; const pdf = new jsPDF({unit:"pt",format:"a4"}); const w = pdf.internal.pageSize.getWidth(); const ratio = canvas.height/canvas.width; const iw = Math.min(w-40,w); const ih = iw*ratio; pdf.addImage(img,"PNG",20,20,iw,ih); pdf.save("ticket_dinamita.pdf"); setTimeout(closeModal,500);}catch(e){ closeModal(); } };
+
+// ====== INIT ======
+function init(){ go("home"); renderVentas(); drawProductos(); drawServicios(); drawClientes(); drawConfig(); }
+init();
+  </script>
 </body>
 </html>
